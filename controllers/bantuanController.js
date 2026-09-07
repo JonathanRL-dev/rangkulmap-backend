@@ -13,7 +13,9 @@ const TRUST_SCORE_REWARD_PER_COMPLETION = 5;
  */
 const getNearbyVolunteers = async (req, res, next) => {
   try {
-    const { lat, lng, radius } = req.query;
+    const { lat: latShort, lng: lngShort, latitude, longitude, radius } = req.query;
+    const lat = latShort ?? latitude;
+    const lng = lngShort ?? longitude;
 
     if (lat === undefined || lng === undefined) {
       const error = new Error('Parameter lat dan lng wajib diisi.');
