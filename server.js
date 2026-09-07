@@ -8,18 +8,29 @@ require('dotenv').config();
 const app = express();
 
 // ===== Middleware Dasar =====
-const allowedOrigins = process.env.CORS_ALLOWED_ORIGINS.split(',').map((o) => o.trim());
-const vercelPreviewRegex = /^https:\/\/rangkulmap-.*\.vercel\.app$/;
+const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || '')
+  .split(',')
+  .map((o) => o.trim())
+  .filter(Boolean);
+const vercelProductionOrigin = 'https://rangkulmap.vercel.app';
+const vercelPreviewRegex = /^https:\/\/rangkulmap-[a-z0-9]+-jonathanrl-dev\.vercel\.app$/;
 
 const corsOriginHandler = (origin, callback) => {
-  if (!origin || allowedOrigins.includes(origin) || vercelPreviewRegex.test(origin)) {
-    callback(null, true);
-  } else {
-    callback(new Error('Not allowed by CORS'));
-  }
+  const isAllowed =
+    !origin ||
+    allowedOrigins.includes(origin) ||
+    origin === vercelProductionOrigin ||
+    vercelPreviewRegex.test(origin);
+
+  console.log(`[CORS] origin=${origin || '(none)'} decision=${isAllowed ? 'allow' : 'deny'}`);
+
+  if (isAllowed) return callback(null, true);
+  return callback(new Error(`Not allowed by CORS: ${origin}`));
 };
 
-app.use(cors({ origin: corsOriginHandler, credentials: true }));
+const corsOptions = { origin: corsOriginHandler, credentials: true };
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 app.use(express.urlencoded({ extended: true }));
 
 // ===== Koneksi MongoDB Atlas =====
