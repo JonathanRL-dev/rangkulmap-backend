@@ -22,13 +22,21 @@ const corsOriginHandler = (origin, callback) => {
     origin === vercelProductionOrigin ||
     vercelPreviewRegex.test(origin);
 
-  console.log(`[CORS] origin=${origin || '(none)'} decision=${isAllowed ? 'allow' : 'deny'}`);
+  console.log('[CORS] Incoming origin:', origin);
+  console.log('[CORS] CORS_ALLOWED_ORIGINS:', process.env.CORS_ALLOWED_ORIGINS);
+  console.log('[CORS] Allowed list:', allowedOrigins);
+  console.log(`[CORS] Decision: ${isAllowed ? 'ALLOWED' : 'REJECTED'}`);
 
   if (isAllowed) return callback(null, true);
   return callback(new Error(`Not allowed by CORS: ${origin}`));
 };
 
-const corsOptions = { origin: corsOriginHandler, credentials: true };
+const corsOptions = {
+  origin: corsOriginHandler,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
 app.use(express.urlencoded({ extended: true }));
