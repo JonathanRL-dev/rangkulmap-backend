@@ -11,12 +11,13 @@ const {
 } = require('../controllers/bantuanController');
 
 const authMiddleware = require('../middlewares/authMiddleware');
+const optionalAuthMiddleware = require('../middlewares/optionalAuthMiddleware');
 
 // Tidak ada prefix di sini — prefix (/bantuan) di-tambahkan saat mounting di server.js
 // Semua route di modul ini wajib login (authMiddleware)
 
 // GET /volunteers/nearby?lat=&lng=&radius= -> cari relawan tersedia terdekat
-router.get('/volunteers/nearby', authMiddleware, getNearbyVolunteers);
+router.get('/volunteers/nearby', optionalAuthMiddleware, getNearbyVolunteers);
 
 // GET /requests/incoming -> permintaan bantuan masuk (status 'menunggu') dekat relawan yang login
 router.get('/requests/incoming', authMiddleware, getIncomingRequests);
