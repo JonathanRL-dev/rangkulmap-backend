@@ -15,8 +15,9 @@ app.use((req, res, next) => {
 // ===== Middleware Dasar =====
 const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || '')
   .split(',')
-  .map((o) => o.trim())
+  .map((o) => o.trim().replace(/\/$/, '')) // Membuang spasi dan garis miring di akhir URL
   .filter(Boolean);
+
 const vercelPreviewPattern = /^https:\/\/rangkulmap-[a-z0-9]+-jonathanrl-dev\.vercel\.app$/;
 
 const corsOptions = {
@@ -40,8 +41,8 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
+app.use(express.json()); // WAJIB ADA: untuk membaca body berformat JSON
 app.use(express.urlencoded({ extended: true }));
-
 // ===== Koneksi MongoDB Atlas =====
 mongoose
   .connect(process.env.MONGODB_URI)
