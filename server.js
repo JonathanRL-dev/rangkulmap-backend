@@ -8,8 +8,18 @@ require('dotenv').config();
 const app = express();
 
 // ===== Middleware Dasar =====
-app.use(cors({ origin: process.env.CORS_ALLOWED_ORIGINS.split(','), credentials: true }));
-app.use(express.json());
+const allowedOrigins = process.env.CORS_ALLOWED_ORIGINS.split(',').map((o) => o.trim());
+const vercelPreviewRegex = /^https:\/\/rangkulmap-.*\.vercel\.app$/;
+
+const corsOriginHandler = (origin, callback) => {
+  if (!origin || allowedOrigins.includes(origin) || vercelPreviewRegex.test(origin)) {
+    callback(null, true);
+  } else {
+    callback(new Error('Not allowed by CORS'));
+  }
+};
+
+app.use(cors({ origin: corsOriginHandler, credentials: true }));
 app.use(express.urlencoded({ extended: true }));
 
 // ===== Koneksi MongoDB Atlas =====

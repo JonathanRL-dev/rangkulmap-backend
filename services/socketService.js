@@ -39,14 +39,23 @@ const initSocketService = (httpServer) => {
     .map((origin) => origin.trim())
     .filter(Boolean);
 
+  const vercelPreviewRegex = /^https:\/\/rangkulmap-.*\.vercel\.app$/;
+
+  const corsOriginHandler = (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin) || vercelPreviewRegex.test(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  };
+
   io = new Server(httpServer, {
     cors: {
-      origin: allowedOrigins,
+      origin: corsOriginHandler,
       methods: ['GET', 'POST'],
       credentials: true,
     },
   });
-
   // ===== Middleware autentikasi JWT untuk setiap koneksi socket =====
   io.use(async (socket, next) => {
     try {
