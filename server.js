@@ -114,6 +114,10 @@ const { initSocketService } = require('./services/socketService');
 initSocketService(httpServer);
 
 const PORT = process.env.PORT || 5000;
+if (!process.env.LOCATIONIQ_SERVER_KEY) {
+  console.warn('⚠️ LOCATIONIQ_SERVER_KEY tidak diset — endpoint geocode akan gagal.');
+}
+
 httpServer.listen(PORT, () => {
   console.log(`🚀 Server berjalan di port ${PORT}`);
 });

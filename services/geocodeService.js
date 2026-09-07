@@ -21,6 +21,11 @@ const buildGeocodeError = (err, context) => {
         break;
       case 401:
       case 403:
+        console.error('LocationIQ menolak kredensial API:', {
+          context,
+          status,
+          data: err.response.data,
+        });
         statusCode = 500; // Kesalahan API key adalah masalah server, bukan client
         message = 'Konfigurasi layanan geocoding bermasalah. Hubungi administrator.';
         break;
