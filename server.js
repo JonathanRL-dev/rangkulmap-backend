@@ -13,35 +13,14 @@ app.use((req, res, next) => {
 });
 
 // ===== Middleware Dasar =====
-const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || '')
-  .split(',')
-  .map((o) => o.trim().replace(/\/$/, '')) // Membuang spasi dan garis miring di akhir URL
-  .filter(Boolean);
-
-const vercelPreviewPattern = /^https:\/\/rangkulmap-[a-z0-9]+-jonathanrl-dev\.vercel\.app$/;
-
-const corsOptions = {
-  origin: function (origin, callback) {
-    const isAllowed =
-      !origin || allowedOrigins.includes(origin) || vercelPreviewPattern.test(origin);
-
-    console.log('[CORS CHECK] origin:', origin, '| allowedOrigins:', allowedOrigins);
-    if (isAllowed) {
-      console.log('[CORS CHECK] => ALLOWED');
-      return callback(null, true);
-    }
-    console.log('[CORS CHECK] => REJECTED');
-    return callback(null, false);
-  },
+app.use(cors({
+  origin: true, // Otomatis mengizinkan SEMUA origin frontend
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  optionsSuccessStatus: 200,
-};
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
-app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
-app.use(express.json()); // WAJIB ADA: untuk membaca body berformat JSON
+app.use(express.json()); 
 app.use(express.urlencoded({ extended: true }));
 // ===== Koneksi MongoDB Atlas =====
 mongoose
