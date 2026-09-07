@@ -7,36 +7,37 @@ require('dotenv').config();
 
 const app = express();
 
+app.use((req, res, next) => {
+  console.log(`[REQUEST] ${req.method} ${req.path} | Origin: ${req.headers.origin}`);
+  next();
+});
+
 // ===== Middleware Dasar =====
 const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || '')
   .split(',')
   .map((o) => o.trim())
   .filter(Boolean);
-const vercelProductionOrigin = 'https://rangkulmap.vercel.app';
-const vercelPreviewRegex = /^https:\/\/rangkulmap-[a-z0-9]+-jonathanrl-dev\.vercel\.app$/;
-
-const corsOriginHandler = (origin, callback) => {
-  const isAllowed =
-    !origin ||
-    allowedOrigins.includes(origin) ||
-    origin === vercelProductionOrigin ||
-    vercelPreviewRegex.test(origin);
-
-  console.log('[CORS] Incoming origin:', origin);
-  console.log('[CORS] CORS_ALLOWED_ORIGINS:', process.env.CORS_ALLOWED_ORIGINS);
-  console.log('[CORS] Allowed list:', allowedOrigins);
-  console.log(`[CORS] Decision: ${isAllowed ? 'ALLOWED' : 'REJECTED'}`);
-
-  if (isAllowed) return callback(null, true);
-  return callback(new Error(`Not allowed by CORS: ${origin}`));
-};
+const vercelPreviewPattern = /^https:\/\/rangkulmap-[a-z0-9]+-jonathanrl-dev\.vercel\.app$/;
 
 const corsOptions = {
-  origin: corsOriginHandler,
+  origin: function (origin, callback) {
+    const isAllowed =
+      !origin || allowedOrigins.includes(origin) || vercelPreviewPattern.test(origin);
+
+    console.log('[CORS CHECK] origin:', origin, '| allowedOrigins:', allowedOrigins);
+    if (isAllowed) {
+      console.log('[CORS CHECK] => ALLOWED');
+      return callback(null, true);
+    }
+    console.log('[CORS CHECK] => REJECTED');
+    return callback(null, false);
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
+  optionsSuccessStatus: 200,
 };
+
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
 app.use(express.urlencoded({ extended: true }));
